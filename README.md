@@ -128,6 +128,98 @@ Override the URL when needed:
 MCP_TEST_URL=https://some-host.test/mcp/elicit node scripts/mcp-elicit-smoke.mjs
 ```
 
+## tmux Probe Harness
+
+The smoke scripts above call the probes over raw HTTP — they confirm the
+*server* responds, but they cannot show what an MCP *client* draws on screen.
+To capture the actual rendered elicitation form, drive a real client (Claude
+Code or Codex) inside a tmux session and snapshot the pane.
+
+There is one script per client, because the two clients drive differently:
+
+- `scripts/probe-codex.sh` — drives the Codex CLI
+- `scripts/probe-claude.sh` — drives Claude Code
+
+Each script bakes in its own client's quirks (boot time, approval prompt, form
+navigation keys) so neither has to branch on the client at runtime. They are
+thin harnesses: each subcommand is one deterministic step, so an operator or an
+AI agent drives the sequence turn by turn with per-client timing and key
+sequences already handled.
+
+The two clients render elicitation differently:
+
+- **Codex** shows a *separate* tool-approval prompt first, then a form with
+  **one field at a time** ("Field 1/N"); Enter submits a field and advances.
+- **Claude Code** has **no separate approval prompt** — it renders **all fields
+  at once** in one panel with `↑/↓` navigation and an `Accept / Decline` row.
+
+Common subcommands (`start`, `send`, `keys`, `capture`, `wait`, `stop`,
+`status`) behave the same in both scripts. Each also has client-specific verbs
+that encode the interaction model — see the header comment in each script for
+the full list. Captures land in `captures/<client>/<label>.txt` (git-ignored),
+trimmed of the blank padding `capture-pane` adds; each is plain text — diffable,
+greppable, and directly readable by an AI agent.
+
+Driving one probe through **Codex**:
+
+```bash
+scripts/probe-codex.sh start
+scripts/probe-codex.sh wait boot
+scripts/probe-codex.sh send 'Use the elicit-http server. Call its probe-01-text-only tool now. Nothing else.'
+scripts/probe-codex.sh wait call
+scripts/probe-codex.sh capture probe-01-approval   # tool-approval prompt
+scripts/probe-codex.sh approve                     # choose "Allow"
+scripts/probe-codex.sh wait form
+scripts/probe-codex.sh capture probe-01-form       # the elicitation form
+scripts/probe-codex.sh answer 'Jane Doe'           # field 1: type + Enter
+scripts/probe-codex.sh answer 'ok'                 # field 2: type + Enter
+scripts/probe-codex.sh wait result
+scripts/probe-codex.sh capture probe-01-result     # accepted content
+scripts/probe-codex.sh stop
+```
+
+Driving the same probe through **Claude Code**:
+
+```bash
+scripts/probe-claude.sh start
+scripts/probe-claude.sh wait boot
+scripts/probe-claude.sh send 'Use the elicit-http MCP server. Call its probe-01-text-only tool now. Nothing else.'
+scripts/probe-claude.sh wait call
+scripts/probe-claude.sh capture probe-01-form      # all fields in one panel
+scripts/probe-claude.sh field 'Jane Doe'           # field 1: type + move Down
+scripts/probe-claude.sh field 'ok'                 # field 2: type + move Down
+scripts/probe-claude.sh accept                     # Enter on the Accept row
+scripts/probe-claude.sh wait result
+scripts/probe-claude.sh capture probe-01-result    # accepted content
+scripts/probe-claude.sh stop
+```
+
+### Typed field verbs
+
+Beyond text fields, each script has verbs for the other field types its client
+renders. They encode the exact key sequences observed for that client:
+
+| Field type    | Codex verb        | Claude Code verb            |
+| ------------- | ----------------- | --------------------------- |
+| text / string | `answer <text>`   | `field <text>`              |
+| integer / number | *no form rendered* | `field <digits>`         |
+| enum          | `pick <index>`    | `pick <index>`              |
+| boolean       | `pick <index>` (1=True, 2=False) | `toggle`     |
+| multi-enum    | *no form rendered* | `check <total> <index...>` |
+
+Indexes are 1-based. For example, Codex `pick 3` selects the third enum option;
+Claude Code `check 3 1 3` toggles options 1 and 3 of a 3-option multi-enum and
+then advances to the next field.
+
+Codex does not render an editable form for integer, number, or multi-enum
+schemas — the call returns immediately with empty content, so there is nothing
+to drive (see the Codex report below). Anything a verb does not cover can still
+be driven with the raw `keys` passthrough after a `capture`.
+
+The `capture probe-NN-form` snapshot is the evidence for the compatibility
+tables below: if it shows labelled, editable fields the client supports that
+schema feature; if it shows only an approve/decline prompt it does not.
+
 ## Codex Elicitation Compatibility Report
 
 Observed from Codex MCP tool calls on 2026-05-16.
