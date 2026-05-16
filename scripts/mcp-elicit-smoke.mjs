@@ -1,5 +1,6 @@
 const baseUrl = process.env.MCP_TEST_URL ?? 'https://mcp-elicit-test-app.test/mcp/elicit';
 const protocolVersion = process.env.MCP_PROTOCOL_VERSION ?? '2025-06-18';
+const toolName = process.env.MCP_TOOL_NAME ?? 'triage-support-request';
 
 const jsonHeaders = {
   'content-type': 'application/json',
@@ -71,13 +72,17 @@ async function answerElicitation(sessionId, id) {
     result: {
       action: 'accept',
       content: {
+        requesterName: 'Codex',
+        contactEmail: 'codex@example.com',
+        accountId: 'acct_123',
+        summary: 'API requests are timing out from production.',
         name: 'Codex',
         email: 'codex@example.com',
-        plan: 'enterprise',
-        severity: 4,
-        affectedArea: 'api',
+        plan: 'team',
+        severity: 3,
         monthlySpend: 250.5,
         canContact: true,
+        areas: ['api'],
       },
     },
   }, {
@@ -118,7 +123,7 @@ async function callTool(sessionId) {
       'mcp-session-id': sessionId,
     },
     body: JSON.stringify(message(2, 'tools/call', {
-      name: 'triage-support-request',
+      name: toolName,
       arguments: {},
     })),
   });
@@ -168,13 +173,18 @@ const messages = await callTool(sessionId);
 const final = messages.at(-1);
 const text = final?.result?.content?.[0]?.text;
 
-if (text !== 'Created enterprise support request for Codex (codex@example.com) affecting api.') {
+if (toolName === 'triage-support-request' && text !== 'Created support request for Codex (codex@example.com) on account acct_123: API requests are timing out from production.') {
   throw new Error(`unexpected final response: ${JSON.stringify(final)}`);
+}
+
+if (toolName !== 'triage-support-request' && ! text?.startsWith(`${toolName} action=accept content=`)) {
+  throw new Error(`unexpected probe response: ${JSON.stringify(final)}`);
 }
 
 console.log(JSON.stringify({
   initialized: body.result.protocolVersion,
   sessionId,
+  toolName,
   messages: messages.map((rpc) => ({
     id: rpc.id,
     method: rpc.method ?? null,

@@ -2,5 +2,8 @@
 command = "php"
 args = ["artisan", "mcp:start", "elicit"]
 
+[mcp_servers.elicit-local.tools.probe-01-text-only]
+approval_mode = "approve"
+
 [mcp_servers.elicit-http]
 url = "https://mcp-elicit-test-app.test/mcp/elicit"
