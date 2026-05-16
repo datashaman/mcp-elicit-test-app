@@ -75,7 +75,7 @@ async function answerElicitation(sessionId, id) {
         email: 'codex@example.com',
         plan: 'enterprise',
         severity: 4,
-        affectedAreas: ['api', 'auth'],
+        affectedArea: 'api',
         monthlySpend: 250.5,
         canContact: true,
       },
@@ -168,7 +168,7 @@ const messages = await callTool(sessionId);
 const final = messages.at(-1);
 const text = final?.result?.content?.[0]?.text;
 
-if (text !== 'Created enterprise support request for Codex (codex@example.com) affecting api, auth.') {
+if (text !== 'Created enterprise support request for Codex (codex@example.com) affecting api.') {
   throw new Error(`unexpected final response: ${JSON.stringify(final)}`);
 }
 

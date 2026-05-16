@@ -33,9 +33,8 @@ triage-support-request
 The tool sends a form elicitation for a realistic support request. It exercises:
 
 - string fields with length and email format validation
-- titled single-select enum fields
+- single-select enum fields
 - integer fields with min/max/default values
-- titled multi-select enum fields
 - number fields with defaults
 - boolean fields with defaults
 

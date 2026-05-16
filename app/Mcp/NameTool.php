@@ -28,11 +28,6 @@ class NameTool extends Tool
                 ->format('email')
                 ->required(),
             'plan' => $schema->enum('Plan', ['free', 'team', 'enterprise'])
-                ->titled([
-                    'free' => 'Free',
-                    'team' => 'Team',
-                    'enterprise' => 'Enterprise',
-                ])
                 ->default('team')
                 ->required(),
             'severity' => $schema->integer('Severity')
@@ -41,15 +36,8 @@ class NameTool extends Tool
                 ->max(5)
                 ->default(3)
                 ->required(),
-            'affectedAreas' => $schema->multiEnum('Affected areas', ['api', 'billing', 'auth', 'dashboard'])
-                ->titled([
-                    'api' => 'API',
-                    'billing' => 'Billing',
-                    'auth' => 'Authentication',
-                    'dashboard' => 'Dashboard',
-                ])
-                ->minItems(1)
-                ->default(['api'])
+            'affectedArea' => $schema->enum('Affected area', ['api', 'billing', 'auth', 'dashboard'])
+                ->default('api')
                 ->required(),
             'monthlySpend' => $schema->number('Approximate monthly spend')
                 ->description('A rough amount in USD.')
@@ -64,7 +52,7 @@ class NameTool extends Tool
             $result->get('plan'),
             $result->get('name'),
             $result->get('email'),
-            implode(', ', $result->get('affectedAreas', [])),
+            $result->get('affectedArea'),
         ));
     }
 }
