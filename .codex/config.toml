@@ -1,0 +1,6 @@
+[mcp_servers.elicit-local]
+command = "php"
+args = ["artisan", "mcp:start", "elicit"]
+
+[mcp_servers.elicit-http]
+url = "https://mcp-elicit-test-app.test/mcp/elicit"

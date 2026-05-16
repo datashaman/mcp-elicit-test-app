@@ -1,0 +1,18 @@
+{
+    "mcpServers": {
+        "elicit-local": {
+            "type": "stdio",
+            "command": "php",
+            "args": [
+                "artisan",
+                "mcp:start",
+                "elicit"
+            ],
+            "env": {}
+        },
+        "elicit-http": {
+            "type": "http",
+            "url": "https://mcp-elicit-test-app.test/mcp/elicit"
+        }
+    }
+}
