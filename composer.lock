@@ -1283,7 +1283,7 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/datashaman/mcp.git",
-                "reference": "3df201853aea87984029cd0a16671814f481c821"
+                "reference": "3cb350c38c6162ed7b16b0466a7c3c1c54582b3c"
             },
             "require": {
                 "ext-json": "*",
@@ -1389,7 +1389,7 @@
                 "issues": "https://github.com/laravel/mcp/issues",
                 "source": "https://github.com/laravel/mcp"
             },
-            "time": "2026-05-16T06:35:07+00:00"
+            "time": "2026-05-16T07:11:23+00:00"
         },
         {
             "name": "laravel/prompts",
