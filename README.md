@@ -47,6 +47,12 @@ url = "https://mcp-elicit-test-app.test/mcp/elicit"
 
 Use `elicit-local` for stdio. Use `elicit-http` for streamable HTTP through Valet.
 
+The committed HTTP config is already set up for the secured Valet URL:
+
+```text
+https://mcp-elicit-test-app.test/mcp/elicit
+```
+
 ## Valet
 
 From this app directory:
