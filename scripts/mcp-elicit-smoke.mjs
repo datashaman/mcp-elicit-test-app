@@ -72,6 +72,12 @@ async function answerElicitation(sessionId, id) {
       action: 'accept',
       content: {
         name: 'Codex',
+        email: 'codex@example.com',
+        plan: 'enterprise',
+        severity: 4,
+        affectedAreas: ['api', 'auth'],
+        monthlySpend: 250.5,
+        canContact: true,
       },
     },
   }, {
@@ -112,7 +118,7 @@ async function callTool(sessionId) {
       'mcp-session-id': sessionId,
     },
     body: JSON.stringify(message(2, 'tools/call', {
-      name: 'ask-name',
+      name: 'triage-support-request',
       arguments: {},
     })),
   });
@@ -162,7 +168,7 @@ const messages = await callTool(sessionId);
 const final = messages.at(-1);
 const text = final?.result?.content?.[0]?.text;
 
-if (text !== 'Hello, Codex!') {
+if (text !== 'Created enterprise support request for Codex (codex@example.com) affecting api, auth.') {
   throw new Error(`unexpected final response: ${JSON.stringify(final)}`);
 }
 
@@ -174,5 +180,6 @@ console.log(JSON.stringify({
     method: rpc.method ?? null,
     text: rpc.result?.content?.[0]?.text ?? null,
     hasMode: Object.hasOwn(rpc.params ?? {}, 'mode'),
+    fieldCount: Object.keys(rpc.params?.requestedSchema?.properties ?? {}).length || null,
   })),
 }, null, 2));

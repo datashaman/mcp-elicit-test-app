@@ -27,10 +27,19 @@ Mcp::web('/mcp/elicit', ElicitationServer::class);
 It exposes a single tool:
 
 ```text
-ask-name
+triage-support-request
 ```
 
-The tool sends a form elicitation asking for `name`, then returns `Hello, <name>!`.
+The tool sends a form elicitation for a realistic support request. It exercises:
+
+- string fields with length and email format validation
+- titled single-select enum fields
+- integer fields with min/max/default values
+- titled multi-select enum fields
+- number fields with defaults
+- boolean fields with defaults
+
+The response summarizes the accepted request.
 
 ## Codex Config
 
